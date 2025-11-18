@@ -4,7 +4,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/controllers"
-	"fmt"
+	// "fmt"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +19,10 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
+	router.GET("/:user/following", controllers.GetFollowedChannels(OAUTH_TOKEN, TwitchClient))
 
 	router.Run()
-
 }
+
+
+// backend workflow:
