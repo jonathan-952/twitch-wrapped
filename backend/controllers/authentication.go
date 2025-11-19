@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	// "fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,15 +15,17 @@ import (
 
 type CodeRequest struct {
 	Code string `json:"code"`
+	UserID string `json:"userID"`
 }
 
-func Authenticate_Token(TwitchSecret, TwitchClient string) gin.HandlerFunc{
+func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken string) gin.HandlerFunc{
 	return func (c *gin.Context) {
 		var body CodeRequest
 
 		// this method auto reads the http request coming in and maps the body to our var
 		if err := c.BindJSON(&body); err != nil {
 			log.Println("BindJSON failed:", err)
+			c.JSON(400, gin.H{"error": "invalid request body"})
 			return
 		}
 
@@ -43,9 +46,21 @@ func Authenticate_Token(TwitchSecret, TwitchClient string) gin.HandlerFunc{
 		}
 		defer resp.Body.Close()
 
-		data, _ := io.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 
+		if err != nil {
+			log.Println("BindJSON failed:", err)
+			// c.JSON(400, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		getUser, err := NewGetTwitchUserHandler(OAuthToken, TwitchClient, body.UserID)
 		
+		if err != nil {
+			log.Println("error fetching user id: ", err)
+			return
+		}
+
 		var tokenResp models.TokenResponse
 
 		if err := json.Unmarshal(data, &tokenResp); err != nil {
@@ -53,14 +68,15 @@ func Authenticate_Token(TwitchSecret, TwitchClient string) gin.HandlerFunc{
 			return
 		}
 		
+		tokenResp.UserID = getUser
 
 		res := database.CreateUser(tokenResp.UserID, tokenResp.Token, tokenResp.RefreshToken, tokenResp.ExpiresAt)
 
 		if res.Error != nil {
-			log.Fatal(res.Error)
+			log.Println(res.Error)
 			return
 		}
 
-		c.JSON(200, gin.H{"status" : "auth token stored in db i think!"})
+		c.JSON(200, gin.H{"status" : "inserted user table into database"})
 	}
 }

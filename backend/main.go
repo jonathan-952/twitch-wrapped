@@ -14,11 +14,12 @@ func main() {
 	godotenv.Load(".env")
 
 	var (
-	OAUTH_TOKEN = os.Getenv("OAUTH_TOKEN")
+	// OAUTH_TOKEN = os.Getenv("OAUTH_TOKEN")
 	TwitchClient = os.Getenv("CLIENT_ID")
 	TwitchSecret = os.Getenv("TWITCH_SECRET")
 	UserAuth = os.Getenv("USER_AUTH")
 	DBConnection = os.Getenv("DB_CONNECTION")
+	OAuthToken = os.Getenv("OAUTH_TOKEN")
 	)
 
 	database.DatabaseConnection(DBConnection)
@@ -32,9 +33,9 @@ func main() {
 
 	router.Use(cors.New(*controllers.CorsPolicy()))
 
-	router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
+	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
 	router.GET("/:user/following", controllers.GetFollowedChannels(UserAuth, TwitchClient))
-	router.POST("/authenticate_token", controllers.Authenticate_Token(TwitchSecret, TwitchClient))
+	router.POST("/authenticate_token", controllers.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken))
 
 	router.Run()
 }
