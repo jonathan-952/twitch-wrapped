@@ -4,7 +4,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/controllers"
-	// "fmt"
+	"github.com/jonathan-952/twitch-wrapped/backend/database"
 	"github.com/joho/godotenv"
 	"github.com/gin-contrib/cors"
 	"time"
@@ -17,7 +17,13 @@ func main() {
 	OAUTH_TOKEN = os.Getenv("OAUTH_TOKEN")
 	TwitchClient = os.Getenv("CLIENT_ID")
 	TwitchSecret = os.Getenv("TWITCH_SECRET")
+	UserAuth = os.Getenv("USER_AUTH")
+	DBConnection = os.Getenv("DB_CONNECTION")
 	)
+
+	database.DatabaseConnection(DBConnection)
+	// to access gorm obj -> use database.DB
+
 
 	router := gin.Default()
 
@@ -33,11 +39,8 @@ func main() {
 	router.Use(cors.New(config))
 
 	router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
-	router.GET("/:user/following", controllers.GetFollowedChannels(OAUTH_TOKEN, TwitchClient))
+	router.GET("/:user/following", controllers.GetFollowedChannels(UserAuth, TwitchClient))
 	router.POST("/authenticate_token", controllers.Authenticate_Token(TwitchSecret, TwitchClient))
 
 	router.Run()
 }
-
-
-// backend workflow:
