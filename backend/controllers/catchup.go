@@ -9,6 +9,8 @@ import (
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
 )
 
+
+
 func NewGetTwitchUserHandler(twitchToken, twitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := c.Param("user")
