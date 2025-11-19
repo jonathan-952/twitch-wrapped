@@ -5,9 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/controllers"
 	"github.com/jonathan-952/twitch-wrapped/backend/database"
+	"github.com/jonathan-952/twitch-wrapped/backend/models"
 	"github.com/joho/godotenv"
 	"github.com/gin-contrib/cors"
-	"time"
 )
 
 func main() {
@@ -24,19 +24,13 @@ func main() {
 	database.DatabaseConnection(DBConnection)
 	// to access gorm obj -> use database.DB
 
+	// auto migrates our user schema to db, doesn't do anything if already migrated
+	database.DB.AutoMigrate(&models.User{})
+
 
 	router := gin.Default()
 
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend origin(s)
-	// config.AllowAllOrigins = true // Alternatively, allow all origins (less secure for production)
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control", "Pragma"}
-	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
-	config.MaxAge = 12 * time.Hour // Cache preflight requests for 12 hours
-
-	router.Use(cors.New(config))
+	router.Use(cors.New(*controllers.CorsPolicy()))
 
 	router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
 	router.GET("/:user/following", controllers.GetFollowedChannels(UserAuth, TwitchClient))
@@ -44,3 +38,9 @@ func main() {
 
 	router.Run()
 }
+
+// auth workflow:
+// 	get user_id
+// 	pass into Oauth
+//  get tokens -> store in db
+// 	cookies next?

@@ -1,11 +1,12 @@
 package database
 
 import (
+	"fmt"
+	"log"
+	"github.com/jonathan-952/twitch-wrapped/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"fmt"
-	"log"
 )
 
 var DB *gorm.DB
@@ -29,4 +30,18 @@ func DatabaseConnection(db_connection string) {
 
 	DB = db
 	fmt.Println("Successfully connected to Neon Postgres database!")
+}
+
+func CreateUser(user_id, auth_token, refresh_token string, expires_at int) *gorm.DB {
+	user := models.User{
+		UserID: user_id,
+		Token: auth_token,
+		RefreshToken: refresh_token,
+		ExpiresAt: expires_at,
+	}
+
+	add := DB.Create(&user)
+
+	return add
+
 }
