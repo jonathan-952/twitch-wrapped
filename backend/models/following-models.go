@@ -12,6 +12,7 @@ type Pagination struct {
 }
 
 type FollowsResponse struct {
+	UserID	   int
 	Total      int          `json:"total"`
 	Data       []FollowData `json:"data"`
 	Pagination Pagination   `json:"pagination"`

@@ -28,7 +28,7 @@ func main() {
 	// to access gorm obj -> use database.DB
 
 	// auto migrates our user schema to db, doesn't do anything if already migrated
-	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.User{}, &models.Following{})
 
 
 	router := gin.Default()
@@ -38,6 +38,7 @@ func main() {
 	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
 	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient))
 	router.POST("/authenticate_token", auth.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWTSecret))
+	router.GET("/get_clips", )
 
 	router.Run()
 }

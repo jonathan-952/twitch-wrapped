@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
+	"github.com/jonathan-952/twitch-wrapped/backend/database"
 )
 
 type TwitchUser struct {
@@ -59,12 +60,14 @@ func GetTwitchUserID(OAuthToken, twitchClient, user string) (string, error) {
 func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		allFollows := []models.FollowData{}
+		var following []models.Following
 		cursor := ""
-		user_id := c.GetString("twitch_user_id")
+		twitch_user_id := c.GetString("twitch_user_id")
 		OAuth_Token := c.GetString("OAuth_Token")
+		user_id := c.GetUint("user_id")
 
 		for {
-			url := fmt.Sprintf("https://api.twitch.tv/helix/channels/followed?user_id=%s", user_id) 
+			url := fmt.Sprintf("https://api.twitch.tv/helix/channels/followed?user_id=%s", twitch_user_id) 
 
 			if cursor != "" {
 				url += "&after=" + cursor
@@ -93,7 +96,6 @@ func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
 				return
 			}
-			fmt.Println("Raw JSON:", string(body)) // DEBUG LINE
 
 			var twitchResp models.FollowsResponse
 			if err := json.Unmarshal(body, &twitchResp); err != nil {
@@ -101,7 +103,14 @@ func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 			}
 
 			allFollows = append(allFollows, twitchResp.Data...)
-
+			
+			for _, f := range twitchResp.Data {
+				following = append(following, models.Following{
+				FollowerID:      uint(user_id),
+				BroadcasterID:   f.BroadcasterID,
+				BroadcasterName: f.BroadcasterName,
+        		})
+    		}
 			// Check for next page
 			if twitchResp.Pagination.Cursor == "" {
 				break 
@@ -109,6 +118,7 @@ func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 
 			cursor = twitchResp.Pagination.Cursor
 		}
+		database.DB.Create(&following)
 
 		c.JSON(200, gin.H{
 			"follows": allFollows,

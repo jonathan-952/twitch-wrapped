@@ -79,8 +79,18 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to retreive user"})
 				return
 			}
+
+			idClaim, ok := claims["id"].(float64)
+			if !ok {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in token"})
+				return
+			}
+			
+    		userID := uint(idClaim)
+
 			c.Set("twitch_user_id", retrievedUser.UserID)
 			c.Set("OAuth_Token", retrievedUser.Token)
+			c.Set("user_id", userID)
 
 			c.Next()
 		} else {
