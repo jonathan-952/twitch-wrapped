@@ -2,9 +2,7 @@ package auth
 
 import (
 	"net/http"
-	"log"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jonathan-952/twitch-wrapped/backend/database"
@@ -27,7 +25,11 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 		tokenStr, err := c.Cookie("twitch_auth")
 
 		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			// if no token found -> status 401, fe should redirect to login
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": "no cookie found",
+			})
+			return
 		}
 
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
@@ -35,13 +37,16 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 			return []byte(JWT_Secret), nil
 			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 			if err != nil {
-				c.AbortWithStatus(http.StatusUnauthorized)
-				log.Fatal(err)
-		}
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+        		"error": "invalid or malformed token",
+				})
+				return
+			}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if !ok {
 				c.AbortWithStatus(http.StatusUnauthorized)
+				return
 			}
 			if float64(time.Now().Unix()) > claims["expires_at"].(float64) {
 				var user models.User
@@ -55,13 +60,15 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 				resp, err := RefreshToken(TwitchSecret, TwitchClient, user.RefreshToken)
 				
 				if err != nil {
-
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to refresh token"})
+					return
 				}
 
 				update_user := database.UpdateUser(uint(claims["id"].(float64)), resp.Token, resp.RefreshToken, resp.ExpiresAt)
 				
 				if update_user != nil {
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error updating user tokens in database"})
+					return
 				}
 			}
 
@@ -70,6 +77,7 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 			result := database.DB.Where("ID = ?", claims["id"]).First(&retrievedUser)
 			if result.Error != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to retreive user"})
+				return
 			}
 			c.Set("twitch_user_id", retrievedUser.UserID)
 			c.Set("OAuth_Token", retrievedUser.Token)
@@ -77,6 +85,7 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 			c.Next()
 		} else {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 	}
 }
