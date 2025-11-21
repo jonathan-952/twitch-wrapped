@@ -1,4 +1,4 @@
-package controllers
+package auth
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/database"
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
+	"github.com/jonathan-952/twitch-wrapped/backend/controllers"
 )
 
 type CodeRequest struct {
@@ -18,7 +19,7 @@ type CodeRequest struct {
 	UserID string `json:"userID"`
 }
 
-func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken string) gin.HandlerFunc{
+func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret string) gin.HandlerFunc{
 	return func (c *gin.Context) {
 		var body CodeRequest
 
@@ -54,7 +55,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken string) gin.Handl
 			return
 		}
 
-		getUser, err := NewGetTwitchUserHandler(OAuthToken, TwitchClient, body.UserID)
+		getUser, err := controllers.GetTwitchUserID(OAuthToken, TwitchClient, body.UserID)
 		
 		if err != nil {
 			log.Println("error fetching user id: ", err)
@@ -77,6 +78,48 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken string) gin.Handl
 			return
 		}
 
+		var retrievedUser models.User
+
+		result := database.DB.First(&retrievedUser, tokenResp.UserID)
+		if result.Error != nil {
+			log.Fatalf("Failed to retrieve user: %v", result.Error)
+		}
+
+		cookie, err := GenerateJWT(retrievedUser.ID, tokenResp.ExpiresAt, JWT_Secret)
+
+		c.SetCookie(
+					"twitch_auth",
+			cookie,
+			3600,
+			"/",
+			"localhost", // Or your actual domain like "example.com"
+			false,       // Set to true for HTTPS
+			true,        // Set to true to prevent client-side JavaScript access
+		
+		)
+
 		c.JSON(200, gin.H{"status" : "inserted user table into database"})
 	}
+}
+
+func RefreshToken(TwitchSecret, TwitchClient, refreshToken string) (*models.TokenResponse, error) {
+	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", 
+		url.Values{
+		"grant_type":    {"refresh_token"},
+		"refresh_token": {refreshToken},
+		"client_id":     {TwitchClient},
+		"client_secret": {TwitchSecret},
+	},
+	
+	)
+	if err != nil {
+		// pass error back up to middleware func
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var data models.TokenResponse
+	json.NewDecoder(resp.Body).Decode(&data)
+
+	return &data, nil
 }

@@ -45,3 +45,14 @@ func CreateUser(user_id, auth_token, refresh_token string, expires_at int) *gorm
 	return add
 
 }
+
+func UpdateUser(id uint, auth_token, refresh_token string, expires_at int) error {
+	// Update multiple fields at once
+	result := DB.Model(&models.User{}).Where("id = ?", id).Updates(models.User{
+	Token:	auth_token,
+	RefreshToken: refresh_token,
+	ExpiresAt: expires_at,
+	})
+	return result.Error
+
+}

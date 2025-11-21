@@ -18,7 +18,7 @@ type TwitchResponse struct {
 }
 
 
-func NewGetTwitchUserHandler(OAuthToken, twitchClient, user string) (string, error) {
+func GetTwitchUserID(OAuthToken, twitchClient, user string) (string, error) {
 
 		url := fmt.Sprintf("https://api.twitch.tv/helix/users?login=%s", user)
 
@@ -51,7 +51,7 @@ func NewGetTwitchUserHandler(OAuthToken, twitchClient, user string) (string, err
         	return "", fmt.Errorf("no user data found")
     	}
 		fmt.Println(result.Data[0].ID)
-		
+
 		return result.Data[0].ID, nil
 }
 
