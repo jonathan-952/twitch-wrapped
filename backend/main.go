@@ -18,7 +18,6 @@ func main() {
 	// OAUTH_TOKEN = os.Getenv("OAUTH_TOKEN")
 	TwitchClient = os.Getenv("CLIENT_ID")
 	TwitchSecret = os.Getenv("TWITCH_SECRET")
-	UserAuth = os.Getenv("USER_AUTH")
 	DBConnection = os.Getenv("DB_CONNECTION")
 	OAuthToken = os.Getenv("OAUTH_TOKEN")
 	JWTSecret = os.Getenv("JWT_SECRET")
@@ -37,14 +36,8 @@ func main() {
 	router.Use(cors.New(*controllers.CorsPolicy()))
 
 	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
-	router.GET("/:user/following", controllers.GetFollowedChannels(UserAuth, TwitchClient))
+	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient))
 	router.POST("/authenticate_token", auth.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWTSecret))
 
 	router.Run()
 }
-
-// auth workflow:
-// 	get user_id
-// 	pass into Oauth
-//  get tokens -> store in db
-// 	cookies next?

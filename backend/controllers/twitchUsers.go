@@ -56,11 +56,13 @@ func GetTwitchUserID(OAuthToken, twitchClient, user string) (string, error) {
 }
 
 
-func GetFollowedChannels(twitchToken, twitchClient string) gin.HandlerFunc {
+func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		allFollows := []models.FollowData{}
 		cursor := ""
-		user_id := c.Param("user")
+		user_id := c.GetString("twitch_user_id")
+		OAuth_Token := c.GetString("OAuth_Token")
+
 		for {
 			url := fmt.Sprintf("https://api.twitch.tv/helix/channels/followed?user_id=%s", user_id) 
 
@@ -75,7 +77,7 @@ func GetFollowedChannels(twitchToken, twitchClient string) gin.HandlerFunc {
 				return
 			}
 
-			req.Header.Set("Authorization", "Bearer "+twitchToken)
+			req.Header.Set("Authorization", "Bearer "+OAuth_Token)
 			req.Header.Set("Client-Id", twitchClient)
 
 			client := &http.Client{}
