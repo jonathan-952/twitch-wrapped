@@ -8,7 +8,6 @@ export default function Auth() {
     const url = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/auth&scope=user:read:follows&state=c3ab8aa609ea11e793ae92361f002671`
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
-    const user = searchParams.get('user');
 
     const handleClick = async () => {
         localStorage.setItem("userID", userID);
@@ -25,7 +24,10 @@ export default function Auth() {
             return
         }
         const getToken = async () => {
-            await axios.post('http://localhost:8080/authenticate_token', {code: code, userID: user})
+            await axios.post('http://localhost:8080/authenticate_token', 
+                {code: code, userID: user}, 
+                { withCredentials: true }
+            )
         }
 
         getToken()

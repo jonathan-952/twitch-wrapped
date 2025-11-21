@@ -80,12 +80,17 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 
 		var retrievedUser models.User
 
-		result := database.DB.First(&retrievedUser, tokenResp.UserID)
+		result := database.DB.Where("user_id = ?", tokenResp.UserID).First(&retrievedUser)
 		if result.Error != nil {
 			log.Fatalf("Failed to retrieve user: %v", result.Error)
 		}
 
 		cookie, err := GenerateJWT(retrievedUser.ID, tokenResp.ExpiresAt, JWT_Secret)
+
+		if err != nil {
+			c.JSON(500, gin.H{"error": "error generating cookie"})
+			return
+		}
 
 		c.SetCookie(
 					"twitch_auth",
@@ -97,7 +102,6 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 			true,        // Set to true to prevent client-side JavaScript access
 		
 		)
-
 		c.JSON(200, gin.H{"status" : "inserted user table into database"})
 	}
 }
