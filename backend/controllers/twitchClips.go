@@ -13,6 +13,8 @@ import (
 
 func GetClips(OAuthToken, BroadcasterID, TwitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+			cursor := ""
+			allClips := []models.Clip{}
 
 			params := models.ClipParams{
 				First: 5,
@@ -31,39 +33,57 @@ func GetClips(OAuthToken, BroadcasterID, TwitchClient string) gin.HandlerFunc {
 
 			query.Set("broadcaster_id", BroadcasterID)
 
-			req, err := http.NewRequest("GET", "https://api.twitch.tv/helix/clips?" + query.Encode(), nil)
+			for {
+				url := "https://api.twitch.tv/helix/clips"
 
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
-				return
-			}
+				if cursor != "" {
+					url += "&after=" + cursor
+				}
 
-			req.Header.Set("Authorization", "Bearer "+OAuthToken)
-			req.Header.Set("Client-Id", TwitchClient)
+				url += "?"
 
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch Twitch API"})
-				return
-			}
-			defer resp.Body.Close()
+				req, err := http.NewRequest("GET", url + query.Encode(), nil)
 
-			body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+					return
+				}
 
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
-				return
-			}
+				req.Header.Set("Authorization", "Bearer "+OAuthToken)
+				req.Header.Set("Client-Id", TwitchClient)
 
-			var twitchResp models.TwitchClipsResponse
-			if err := json.Unmarshal(body, &twitchResp); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
-				return
+				client := &http.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch Twitch API"})
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := io.ReadAll(resp.Body)
+
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+					return
+				}
+
+				var twitchResp models.TwitchClipsResponse
+				if err := json.Unmarshal(body, &twitchResp); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+					return
+				}
+
+				allClips = append(allClips, twitchResp.Data...)
+
+				if twitchResp.Pagination.Cursor == "" {
+					break
+				}
+
+				cursor = twitchResp.Pagination.Cursor
 			}
 	
 			c.JSON(200, gin.H{
-			"clips": twitchResp,
+			"clips": allClips,
 		})
 
 
