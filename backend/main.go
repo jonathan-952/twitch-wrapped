@@ -9,7 +9,7 @@ import (
 	"github.com/jonathan-952/twitch-wrapped/backend/auth"
 	"github.com/joho/godotenv"
 	"github.com/gin-contrib/cors"
-)
+)	
 
 func main() {
 	godotenv.Load(".env")
@@ -21,7 +21,7 @@ func main() {
 	DBConnection = os.Getenv("DB_CONNECTION")
 	OAuthToken = os.Getenv("OAUTH_TOKEN")
 	JWTSecret = os.Getenv("JWT_SECRET")
-
+	
 	)
 
 	database.DatabaseConnection(DBConnection)
@@ -38,7 +38,7 @@ func main() {
 	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
 	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient))
 	router.POST("/authenticate_token", auth.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWTSecret))
-	router.GET("/get_clips", )
+	router.GET("/get_clips", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetClips(OAuthToken, "38251312", TwitchClient))
 
 	router.Run()
 }

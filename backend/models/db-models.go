@@ -17,9 +17,3 @@ type TokenResponse struct {
 	ExpiresAt int `json:"expires_in"` 
 }
 
-type Following struct {
-	gorm.Model
-	BroadcasterID string
-	BroadcasterName string
-	FollowerID uint
-}
