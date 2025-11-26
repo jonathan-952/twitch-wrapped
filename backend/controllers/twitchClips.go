@@ -16,6 +16,7 @@ func GetClips(OAuthToken, BroadcasterID, TwitchClient string) gin.HandlerFunc {
 			cursor := ""
 			allClips := []models.Clip{}
 
+			// params should be passed in from fe and extracted
 			params := models.ClipParams{
 				First: 5,
 			}
@@ -86,9 +87,6 @@ func GetClips(OAuthToken, BroadcasterID, TwitchClient string) gin.HandlerFunc {
 			"clips": allClips,
 		})
 
-
-
-			// take into account pagination
 			// take into account how many clips you want to fetch
 			// query for time window (started/ended date)
 
