@@ -16,17 +16,18 @@ export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer
       <div className="p-4">
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Followed Channels</h2>
         <div className="space-y-1">
-          {streamers.length > 0 && streamers.map((streamer, index) => (
+          {streamers.map((streamer, index) => (
             <button
               key={index}
               onClick={() => onSelectStreamer(streamer)}
               className={cn(
-                "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors",
+                "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-black bg-red-50",
                 selectedStreamer != null && selectedStreamer.BroadcasterID === streamer.BroadcasterID
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "hover:bg-sidebar-accent/50 text-sidebar-foreground",
               )}
             >
+              {streamer.BroadcasterName}
             </button>
           ))}
         </div>
