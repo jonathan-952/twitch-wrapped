@@ -80,6 +80,7 @@ func JWTMiddleware(TwitchSecret, TwitchClient, JWT_Secret string) gin.HandlerFun
 				return
 			}
 
+
 			idClaim, ok := claims["id"].(float64)
 			if !ok {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in token"})

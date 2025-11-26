@@ -65,6 +65,7 @@ func GetFollowedChannels(twitchClient string) gin.HandlerFunc {
 		twitch_user_id := c.GetString("twitch_user_id")
 		OAuth_Token := c.GetString("OAuth_Token")
 		user_id := c.GetUint("user_id")
+		fmt.Println("token", OAuth_Token)
 
 		for {
 			url := fmt.Sprintf("https://api.twitch.tv/helix/channels/followed?user_id=%s", twitch_user_id) 

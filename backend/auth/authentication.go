@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	// "fmt"
 	"io"
 	"log"
 	"net/http"
@@ -36,7 +35,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 		params.Add("client_secret", TwitchSecret)
 		params.Add("code", body.Code)
 		params.Add("grant_type", "authorization_code")
-		params.Add("redirect_uri", "http://localhost:3000")
+		params.Add("redirect_uri", "http://localhost:3000/auth")
 
 		resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", params)
 
@@ -68,7 +67,6 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 			log.Println(err)
 			return
 		}
-		
 		tokenResp.UserID = getUser
 
 		res := database.CreateUser(tokenResp.UserID, tokenResp.Token, tokenResp.RefreshToken, tokenResp.ExpiresAt)

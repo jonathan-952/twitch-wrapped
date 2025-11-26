@@ -19,12 +19,18 @@ export default function DashboardPage() {
   const [totalStreamers, setTotalStreamers] = useState(0)
 
   useEffect(() => {
+    console.log("triggered useEffect")
     const getFollowers = (async() => {
-      const res = await axios.get("http://localhost:8080/following", 
-      {withCredentials: true}
-      )
-      setStreamers(res.data.follows)
-      setTotalStreamers(res.data.total)
+      try {
+        const res = await axios.get("http://localhost:8080/following", 
+        {withCredentials: true}
+        )
+        console.log(res.data)
+        setStreamers(res.data.follows)
+        setTotalStreamers(res.data.total)
+      } catch (err) {
+        console.log(err)
+      }
     })
     getFollowers()
   },[])
