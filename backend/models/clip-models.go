@@ -6,7 +6,7 @@ type Clip struct {
 	ViewCount int `json:"view_count"`
 	CreatedAt string `json:"created_at"`
 	Duration float64 `json:"duration"`
-	Thumbnail_URL string `json:"thumbnail_url"`
+	ThumbnailURL string `json:"thumbnail_url"`
 }
 
 type ClipParams struct {

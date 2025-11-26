@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Navbar } from "@/client-components/navbar"
 import { StreamersSidebar } from "@/client-components/streamers-sidebar"
-// import { ClipsView } from "@/client-components/clips-view"
+import { ClipsView } from "@/client-components/clips-view"
 import axios from "axios"
 
 export interface StreamersData {
@@ -47,7 +47,10 @@ export default function DashboardPage() {
           onSelectStreamer={handleClick}
         />
         <main className="flex-1 ml-64">
-          {/* <ClipsView streamer={selectedStreamer} /> */}
+          {selectedStreamer && 
+          <ClipsView streamer={selectedStreamer} />
+          }
+          
         </main>
       </div>
     </div>

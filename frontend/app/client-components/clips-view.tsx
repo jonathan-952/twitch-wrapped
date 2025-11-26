@@ -7,12 +7,12 @@ import { ClipCard } from "@/client-components/clip-card"
 import axios from "axios"
 
 export interface Clip {
-	Url: string 
-	Title: string 
-	ViewCount: number
-	CreatedAt: string 
-  Duration: number
-	Thumbnail_URL: string
+	url: string 
+	title: string 
+	view_count: number
+	created_at: string 
+  duration: number
+	thumbnail_url: string
 }
 
 interface ClipsViewProps {
@@ -25,14 +25,17 @@ export function ClipsView({ streamer }: ClipsViewProps) {
   // pass in params: streamer id, time window, popularity
   useEffect(() => {
     const fetchClips = (async () => {
+      try {
       const res = await axios.get('http://localhost:8080/get_clips',
         {withCredentials: true}
       )
       setClips(res.data.clips)
+      } catch (err) {
+        console.log(err)
+      }
     })
     fetchClips()
-
-  })
+  }, [])
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -41,11 +44,13 @@ export function ClipsView({ streamer }: ClipsViewProps) {
       </div>
 
       <ClipsFilters />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
-        {clips.map((clip, index) => (
-          <ClipCard key={index} clip={clip} streamer={streamer} />
-        ))}
-      </div>
+      { clips.length > 0 &&
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
+          {clips.map((clip, index) => (
+            <ClipCard key={index} clip={clip} streamer={streamer} />
+          ))}
+        </div>
+      }
     </div>
   )
 }

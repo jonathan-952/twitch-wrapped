@@ -8,6 +8,7 @@ interface ClipCardProps {
 }
 
 function formatViews(views: number): string {
+  console.log(views)
   if (views >= 1000000) {
     return `${(views / 1000000).toFixed(1)}M`
   }
@@ -37,23 +38,24 @@ function formatRelativeTime(timestamp: string): string {
 }
 
 export function ClipCard({ clip, streamer }: ClipCardProps) {
+  console.log(clip)
   return (
     <div className="group cursor-pointer">
       <div className="relative overflow-hidden rounded-md bg-card mb-2 aspect-video">
         <img
         //   src={clip.thumbnail || "/placeholder.svg"}
-          alt={clip.Title}
+          alt={clip.title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-background/90 px-1.5 py-0.5 rounded text-xs font-semibold text-foreground">
           <ClockIcon className="h-3 w-3" />
-          {formatDuration(clip.Duration)}
+          {formatDuration(clip.duration)}
         </div>
       </div>
 
       <div className="space-y-1">
         <h3 className="font-semibold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-          {clip.Title}
+          {clip.title}
         </h3>
 
         <p className="text-sm text-muted-foreground">{streamer.BroadcasterName}</p>
@@ -61,14 +63,11 @@ export function ClipCard({ clip, streamer }: ClipCardProps) {
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <EyeIcon className="h-3 w-3" />
-            {formatViews(clip.ViewCount)}
+            {formatViews(clip.view_count)}
           </span>
-          <span>{formatRelativeTime(clip.CreatedAt)}</span>
+          <span>{formatRelativeTime(clip.created_at)}</span>
         </div>
       </div>
     </div>
   )
 }
-
-// thumbnail
-// duration
