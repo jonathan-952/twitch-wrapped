@@ -3,16 +3,18 @@ import axios from "axios";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, ChangeEvent } from "react";
 import { Button } from "@/components/button"
+import { useRouter } from 'next/navigation';
 
 export default function Auth() {
     const [userID, setUserID] = useState<string>("")
-    const url = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000&scope=user:read:follows&state=c3ab8aa609ea11e793ae92361f002671`
+    const url = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/auth&scope=user:read:follows&state=c3ab8aa609ea11e793ae92361f002671`
     const searchParams = useSearchParams();
+    const router = useRouter();
     const code = searchParams.get('code');
 
     const handleClick = async () => {
         localStorage.setItem("userID", userID);
-        window.location.href = url;
+        router.push(url)
     }
     
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
@@ -25,15 +27,19 @@ export default function Auth() {
             return
         }
         const getToken = async () => {
+            try {
             await axios.post('http://localhost:8080/authenticate_token', 
                 {code: code, userID: user}, 
                 { withCredentials: true }
             )
+            } catch (err) {
+                console.error(err)
+            }
         }
-
         getToken()
+        router.push('http://localhost:3000')
      
-    },[code])
+    },[code, router])
     return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="max-w-md w-full mx-4">
@@ -94,7 +100,7 @@ export default function Auth() {
           
 
           <p className="text-xs text-center text-muted-foreground mt-4">
-            We'll only access your followed channels and public clips
+            We only access your followed channels and public clips
           </p>
         </div>
       </div>

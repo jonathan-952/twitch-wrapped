@@ -36,7 +36,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 		params.Add("client_secret", TwitchSecret)
 		params.Add("code", body.Code)
 		params.Add("grant_type", "authorization_code")
-		params.Add("redirect_uri", "http://localhost:3000/auth")
+		params.Add("redirect_uri", "http://localhost:3000")
 
 		resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", params)
 
@@ -93,7 +93,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 		}
 
 		c.SetCookie(
-					"twitch_auth",
+			"twitch_auth",
 			cookie,
 			3600,
 			"/",
