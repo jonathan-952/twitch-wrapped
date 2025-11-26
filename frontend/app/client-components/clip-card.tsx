@@ -43,7 +43,7 @@ export function ClipCard({ clip, streamer }: ClipCardProps) {
     <div className="group cursor-pointer">
       <div className="relative overflow-hidden rounded-md bg-card mb-2 aspect-video">
         <img
-        //   src={clip.thumbnail || "/placeholder.svg"}
+          src={clip.thumbnail_url || "/placeholder.svg"}
           alt={clip.title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -58,7 +58,7 @@ export function ClipCard({ clip, streamer }: ClipCardProps) {
           {clip.title}
         </h3>
 
-        <p className="text-sm text-muted-foreground">{streamer.BroadcasterName}</p>
+        <p className="text-sm text-muted-foreground">{streamer.broadcaster_name}</p>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">

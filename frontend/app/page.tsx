@@ -7,10 +7,10 @@ import { ClipsView } from "@/client-components/clips-view"
 import axios from "axios"
 
 export interface StreamersData {
-    BroadcasterID:    string
-    BroadcasterLogin: string
-    BroadcasterName:  string 
-    FollowedAt:       string 
+    broadcaster_id:    string
+    broadcaser_login: string
+    broadcaster_name:  string 
+    followed_at:       string 
 }
 
 export default function DashboardPage() {

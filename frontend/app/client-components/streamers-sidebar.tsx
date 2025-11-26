@@ -22,12 +22,12 @@ export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer
               onClick={() => onSelectStreamer(streamer)}
               className={cn(
                 "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-black bg-red-50",
-                selectedStreamer != null && selectedStreamer.BroadcasterID === streamer.BroadcasterID
+                selectedStreamer != null && selectedStreamer.broadcaster_id === streamer.broadcaster_id
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "hover:bg-sidebar-accent/50 text-sidebar-foreground",
               )}
             >
-              {streamer.BroadcasterName}
+              {streamer.broadcaster_name}
             </button>
           ))}
         </div>

@@ -26,20 +26,22 @@ export function ClipsView({ streamer }: ClipsViewProps) {
   useEffect(() => {
     const fetchClips = (async () => {
       try {
-      const res = await axios.get('http://localhost:8080/get_clips',
-        {withCredentials: true}
-      )
+      const res = await axios.get('http://localhost:8080/get_clips', {
+        withCredentials: true, 
+        params: {broadcaster_id: streamer.broadcaster_id}
+      })
       setClips(res.data.clips)
       } catch (err) {
         console.log(err)
       }
     })
     fetchClips()
-  }, [])
+  }, [streamer.broadcaster_id])
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-1">{streamer.BroadcasterName}'s Clips</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-1">{streamer.broadcaster_name}'s Clips</h2>
         <p className="text-sm text-muted-foreground">Catch up on trending moments</p>
       </div>
 

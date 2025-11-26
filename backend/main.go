@@ -38,7 +38,7 @@ func main() {
 	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
 	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient))
 	router.POST("/authenticate_token", auth.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWTSecret))
-	router.GET("/get_clips", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetClips(OAuthToken, "38251312", TwitchClient))
+	router.GET("/get_clips", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetClips(OAuthToken, TwitchClient))
 
 	router.Run()
 }
