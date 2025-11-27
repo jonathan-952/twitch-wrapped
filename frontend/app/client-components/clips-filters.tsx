@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/popover"
@@ -9,10 +9,29 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
-export function ClipsFilters() {
+export interface ClipParams {
+  startedAt: string
+  endedAt: string
+}
+interface ClipsFiltersProps {
+  params: (params: ClipParams) => void
+}
+
+export function ClipsFilters({params}: ClipsFiltersProps) {
   const [fromDate, setFromDate] = useState<Date>()
   const [toDate, setToDate] = useState<Date>()
   const [sortBy, setSortBy] = useState("popularity")
+
+  useEffect(() => {
+    if (!fromDate || !toDate) {
+      return
+    }
+
+    params({
+      startedAt: fromDate.toISOString(),
+      endedAt: toDate.toISOString(),
+    })
+  }, [fromDate, toDate])
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-card border border-border rounded-lg">
@@ -52,7 +71,7 @@ export function ClipsFilters() {
         </Popover>
       </div>
 
-      <div className="flex items-center gap-2">
+     <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-foreground">Sort by:</span>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[140px]">
@@ -71,3 +90,4 @@ export function ClipsFilters() {
     </div>
   )
 }
+ 

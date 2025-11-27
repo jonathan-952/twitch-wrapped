@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
-	"strconv"
 	"net/url"
 )
 
@@ -18,23 +17,20 @@ type ClipRequest struct {
 func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		broadcaster_id := c.Query("broadcaster_id")
+		started_at := c.Query("started")
+		ended_at := c.Query("ended")
 		cursor := ""
 		allClips := []models.Clip{}
 
 		// params should be passed in from fe and extracted
-		params := models.ClipParams{
-			First: 5,
-		}
-		
+
+
 		query := url.Values{}
-		if params.StartedAt != "" {
-			query.Set("started_at", params.StartedAt)
+		if started_at!= "" {
+			query.Set("started_at", started_at)
 		}
-		if params.EndedAt != "" {
-			query.Set("ended_at", params.EndedAt)
-		}
-		if params.First != 0 {
-			query.Set("first", strconv.Itoa(params.First))
+		if ended_at != "" {
+			query.Set("ended_at", ended_at)
 		}
 
 		query.Set("broadcaster_id", broadcaster_id)
