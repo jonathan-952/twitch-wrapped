@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
-	"encoding/json"
+	"net/url"
+	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
-	"net/url"
+	"github.com/jonathan-952/twitch-wrapped/backend/database"
 )
 
 type ClipRequest struct {
@@ -21,6 +23,7 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		ended_at := c.Query("ended")
 		cursor := ""
 		allClips := []models.Clip{}
+		var addClips []models.ClipSnapshot
 
 		// params should be passed in from fe and extracted
 
@@ -32,7 +35,7 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		if ended_at != "" {
 			query.Set("ended_at", ended_at)
 		}
-
+		// xqc id, change back later 
 		query.Set("broadcaster_id", "71092938")
 		query.Set("first", "100")
 
@@ -76,7 +79,19 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 				return
 			}
 
+			for _, f := range twitchResp.Data {
+				addClips = append(addClips, models.ClipSnapshot{
+					ClipID: f.ClipID,
+					CreatedAt: f.CreatedAt,
+					LastChecked: time.Now(),
+					LastViewCount: f.ViewCount,
+				})
+    		}
+
+
 			allClips = append(allClips, twitchResp.Data...)
+
+			database.DB.Create(&addClips)
 
 			if twitchResp.Pagination.Cursor == "" {
 				break
@@ -91,10 +106,5 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 
 		// take into account how many clips you want to fetch
 		// query for time window (started/ended date)
-
 }
-}
-
-func ClipVelocity() {
-
 }

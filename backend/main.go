@@ -28,7 +28,7 @@ func main() {
 	// to access gorm obj -> use database.DB
 
 	// auto migrates our user schema to db, doesn't do anything if already migrated
-	database.DB.AutoMigrate(&models.User{}, &models.Following{})
+	database.DB.AutoMigrate(&models.User{}, &models.Following{}, &models.ClipSnapshot{})
 
 
 	router := gin.Default()

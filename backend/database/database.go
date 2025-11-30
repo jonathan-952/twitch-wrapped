@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 	"log"
+	"time"
+
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,5 +56,21 @@ func UpdateUser(id uint, auth_token, refresh_token string, expires_at int) error
 	ExpiresAt: expires_at,
 	})
 	return result.Error
+}
+
+func CreateSnapshot(clip_id, created_at string, last_checked time.Time, last_view_count int) error {
+	snapshot := models.ClipSnapshot{
+		ClipID: clip_id,
+		CreatedAt: created_at,
+		LastChecked: last_checked,
+		LastViewCount: last_view_count,
+	}
+
+	add := DB.Create(&snapshot)
+
+	return add.Error
+}
+
+func UpdateClipSnapshot() {
 
 }
