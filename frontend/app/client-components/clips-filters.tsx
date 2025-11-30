@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/popover"
 import { Calendar } from "@/components/calendar"
 import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { parseISO, format } from "date-fns";
+import { Clip } from "./clips-view"
 
 export interface ClipParams {
   startedAt: string
@@ -17,10 +18,24 @@ interface ClipsFiltersProps {
   params: (params: ClipParams) => void
 }
 
+export function GroupClipsByDay(clips: Clip[]) {
+  const sorted = [...clips].sort(
+    (a, b) => parseISO(a.created_at).getTime() - parseISO(b.created_at).getTime()
+  );
+
+  const groups = sorted.reduce((acc: Record<string, Clip[]>, clip) => {
+    const day = format(parseISO(clip.created_at), "yyyy-MM-dd");
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(clip);
+    return acc;
+  }, {});
+
+  return groups;
+}
+
 export function ClipsFilters({params}: ClipsFiltersProps) {
   const [fromDate, setFromDate] = useState<Date>()
   const [toDate, setToDate] = useState<Date>()
-  const [sortBy, setSortBy] = useState("popularity")
 
   useEffect(() => {
     if (!fromDate || !toDate) {
@@ -71,20 +86,11 @@ export function ClipsFilters({params}: ClipsFiltersProps) {
         </Popover>
       </div>
 
-     <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">Sort by:</span>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="popularity">Popularity</SelectItem>
-            <SelectItem value="date">Date</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button variant="outline" size="sm" className="ml-auto bg-transparent">
+      <Button variant="outline" size="sm" className="ml-auto bg-transparent" 
+      onClick={() => {
+        setFromDate(undefined)
+        setToDate(undefined)
+      }}>
         Clear Filters
       </Button>
     </div>

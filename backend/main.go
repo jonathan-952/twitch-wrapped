@@ -36,7 +36,7 @@ func main() {
 	router.Use(cors.New(*controllers.CorsPolicy()))
 
 	// router.GET("/get_user/:user", controllers.NewGetTwitchUserHandler(OAUTH_TOKEN, TwitchClient))
-	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient))
+	router.GET("/following", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetFollowedChannels(TwitchClient)) // get rid of 
 	router.POST("/authenticate_token", auth.Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWTSecret))
 	router.GET("/get_clips", auth.JWTMiddleware(TwitchSecret, TwitchClient, JWTSecret), controllers.GetClips(OAuthToken, TwitchClient))
 

@@ -5,7 +5,6 @@ import { useState } from "react";
 
 interface ClipCardProps {
   clip: Clip;
-  streamer: StreamersData;
 }
 
 function formatViews(views: number): string {
@@ -38,7 +37,7 @@ function formatRelativeTime(timestamp: string): string {
   return `${Math.floor(diffDays / 7)}w ago`;
 }
 
-export function ClipCard({ clip, streamer }: ClipCardProps) {
+export function ClipCard({ clip}: ClipCardProps) {
   console.log(clip);
   const [playing, setPlaying] = useState(false);
   const embedUrl = clip.embed_url + "&parent=localhost&autoplay=true";

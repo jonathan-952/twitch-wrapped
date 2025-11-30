@@ -16,7 +16,7 @@ type ClipRequest struct {
 
 func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		broadcaster_id := c.Query("broadcaster_id")
+		// broadcaster_id := c.Query("broadcaster_id")
 		started_at := c.Query("started")
 		ended_at := c.Query("ended")
 		cursor := ""
@@ -33,7 +33,8 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 			query.Set("ended_at", ended_at)
 		}
 
-		query.Set("broadcaster_id", broadcaster_id)
+		query.Set("broadcaster_id", "71092938")
+		query.Set("first", "100")
 
 		for {
 			url := "https://api.twitch.tv/helix/clips"
@@ -92,4 +93,8 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		// query for time window (started/ended date)
 
 }
+}
+
+func ClipVelocity() {
+
 }
