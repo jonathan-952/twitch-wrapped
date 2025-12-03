@@ -114,40 +114,32 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 
 			cursor = twitchResp.Pagination.Cursor
 		}
-
+		// check if 12hr difference has passed
+		// check for 
 		for _, c := range allClips {
 			value, ok := seen_map[c.ClipID]
-			if ok {
-				c.TrendingScore = (c.ViewCount - value.LastViewCount) / value.LastChecked.Hour()
+			if ok  && time.Since(value.LastChecked).Hours() >= 12 {
+				c.TrendingScore = int(float64(c.ViewCount - value.LastViewCount) / time.Since(value.LastChecked).Hours())
 				if c.TrendingScore > 10 {
 					c.Retention = "growing"
-				}
-				if c.TrendingScore > 0 {
-					c.Retention = "growing"
-				}
-				if c.TrendingScore <= 0 {
+				} else if c.TrendingScore > 0 {
+					c.Retention = "steady"
+				} else if c.TrendingScore <= 0 {
 					c.Retention = "stagnant"
 				}
-			}
-		}
 
-		// add every incoming clip to var -> push to db after
-		for _, f := range allClips {
-			_, ok := seen_map[f.ClipID]
-
-			if ok {
 				toUpdate = append(toUpdate, models.ClipSnapshot{
-					ClipID:        f.ClipID,
-					CreatedAt:     f.CreatedAt,
-					LastChecked:   time.Now(),
-					LastViewCount: f.ViewCount,
+				ClipID:        c.ClipID,
+				LastChecked:   time.Now(),
+				LastViewCount: c.ViewCount,
 				})
-			} else {
+
+			} else if !ok {
 				addClips = append(addClips, models.ClipSnapshot{
-					ClipID:        f.ClipID,
-					CreatedAt:     f.CreatedAt,
+					ClipID:        c.ClipID,
+					CreatedAt:     c.CreatedAt,
 					LastChecked:   time.Now(),
-					LastViewCount: f.ViewCount,
+					LastViewCount: c.ViewCount,
 				})
 			}
 		}

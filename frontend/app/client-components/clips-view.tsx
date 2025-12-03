@@ -20,6 +20,8 @@ export interface Clip {
   duration: number;
   thumbnail_url: string;
   embed_url: string;
+  TrendingScore: number;
+  Retention: string;
 }
 
 export function ClipsView() {
@@ -59,7 +61,7 @@ export function ClipsView() {
             ended: clipParams?.endedAt,
           },
         });
-
+        
         setClips(res.data.clips);
       } catch (err) {
         console.log(err);
