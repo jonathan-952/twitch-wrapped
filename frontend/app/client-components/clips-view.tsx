@@ -1,16 +1,16 @@
 "use client";
 
-import { StreamersData } from "@/page";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import axios from "axios";
+import { parseISO, format } from "date-fns";
+
 import {
   ClipsFilters,
   GroupClipsByDay,
 } from "@/client-components/clips-filters";
 import { ClipCard } from "@/client-components/clip-card";
-import axios from "axios";
 import { ClipParams } from "@/client-components/clips-filters";
-import { useMemo } from "react";
-import { parseISO, format } from "date-fns";
+import { StreamersData } from "@/page";
 
 export interface Clip {
   url: string;
@@ -24,53 +24,76 @@ export interface Clip {
   Retention: string;
 }
 
-export function ClipsView() {
+export function ClipsView({streamer}: {streamer: StreamersData}) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [clipParams, setClipParams] = useState<ClipParams | null>(null);
 
+  // NEW — make a per-day limit state
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>(
+    {}
+  );
 
   const grouped = useMemo(() => {
-  // Make a fresh grouped object every time `clips` changes
-  const baseGroups = GroupClipsByDay(clips);
-  
-  const sortedGroups: Record<string, Clip[]> = {};
+    const baseGroups = GroupClipsByDay(clips);
+    const sortedGroups: Record<string, Clip[]> = {};
 
-  Object.keys(baseGroups).forEach((day) => {
-    const clipsForDay = baseGroups[day];
+    Object.keys(baseGroups).forEach((day) => {
+      sortedGroups[day] = [...baseGroups[day]].sort(
+        (a, b) => b.view_count - a.view_count
+      );
+    });
 
-    sortedGroups[day] = [...clipsForDay].sort(
-      (a, b) => b.view_count - a.view_count
-    );
-  });
-
-  return sortedGroups;
-}, [clips]);
+    return sortedGroups;
+  }, [clips]);
 
   // sorted list of days (latest first)
-  const days = useMemo(() => Object.keys(grouped).sort().reverse(), [grouped]);
+  const days = useMemo(
+    () => Object.keys(grouped).sort().reverse(),
+    [grouped]
+  );
 
-  // pass in params: streamer id, time window, popularity
+  // Fetch clips when filter changes
   useEffect(() => {
-    console.log(clipParams);
     const fetchClips = async () => {
       try {
         const res = await axios.get("http://localhost:8080/get_clips", {
           withCredentials: true,
           params: {
             date_filter: clipParams?.date_filter,
+            broadcaster_id: streamer.broadcaster_id
           },
         });
-        
+
         setClips(res.data.clips);
+
+        // Reset visible count when new data arrives
+        const newCounts: Record<string, number> = {};
+        const newGrouped = GroupClipsByDay(res.data.clips);
+
+        Object.keys(newGrouped).forEach((day) => {
+          newCounts[day] = 4; // show first 10 by default
+        });
+
+        setVisibleCounts(newCounts);
       } catch (err) {
         console.log(err);
       }
     };
+
     fetchClips();
   }, [clipParams?.date_filter]);
 
-  const handleClipParams = async (params: ClipParams) => {
+  // Handle child filter updates
+  const handleClipParams = (params: ClipParams) => {
     setClipParams(params);
+  };
+
+  // "View More" action per group
+  const handleViewMore = (day: string) => {
+    setVisibleCounts((prev) => ({
+      ...prev,
+      [day]: prev[day] + 8, // reveal 10 more
+    }));
   };
 
   return (
@@ -83,19 +106,35 @@ export function ClipsView() {
       </div>
 
       <ClipsFilters params={handleClipParams} />
-      {days.map((day) => (
-        <section key={day} className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">
-            {format(parseISO(day), "EEEE, MMM d")}
-          </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {grouped[day].map((clip, index) => (
-              <ClipCard key={index} clip={clip} />
-            ))}
-          </div>
-        </section>
-      ))}
+      {days.map((day) => {
+        const clipsForDay = grouped[day] || [];
+        const visible = visibleCounts[day] || 8;
+
+        return (
+          <section key={day} className="mb-6">
+            <h2 className="text-lg font-semibold mb-2">
+              {format(parseISO(day), "EEEE, MMM d")}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {clipsForDay.slice(0, visible).map((clip, index) => (
+                <ClipCard key={index} clip={clip} />
+              ))}
+            </div>
+
+            {/* Show "View More" if there are still hidden clips */}
+            {visible < clipsForDay.length && (
+              <button
+                onClick={() => handleViewMore(day)}
+                className="mt-3 text-sm text-blue-500 hover:underline"
+              >
+                View More
+              </button>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

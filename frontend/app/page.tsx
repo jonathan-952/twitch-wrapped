@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Navbar } from "@/client-components/navbar"
+import { StreamersSidebar } from "@/client-components/streamers-sidebar"
 import { ClipsView } from "@/client-components/clips-view"
 import axios from "axios"
 
@@ -14,8 +15,20 @@ export interface StreamersData {
 
 export default function DashboardPage() {
   const [selectedStreamer, setSelectedStreamer] = useState<StreamersData | null>(null)
+  const [streamers, setStreamers] = useState<StreamersData[]>([])
 
   useEffect(() => {
+    const getFollowers = (async() => {
+      try {
+        const res = await axios.get("http://localhost:8080/following", 
+        {withCredentials: true}
+        )
+        setStreamers(res.data.follows)
+      } catch (err) {
+        console.log(err)
+      }
+    })
+    getFollowers()
   },[])
 
   const handleClick = (streamer: StreamersData) => {
@@ -26,15 +39,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex">
-        {/* <StreamersSidebar
+        <StreamersSidebar
           streamers={streamers}
           selectedStreamer={selectedStreamer}
           onSelectStreamer={handleClick}
-        /> */}
+        />
         <main className="flex-1 ml-64">
-
-          <ClipsView />
-        
+          {selectedStreamer && 
+          <ClipsView streamer={selectedStreamer} />
+          }
+          
         </main>
       </div>
     </div>

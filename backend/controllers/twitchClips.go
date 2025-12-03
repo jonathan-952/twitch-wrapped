@@ -18,7 +18,7 @@ type ClipRequest struct {
 
 func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// broadcaster_id := c.Query("broadcaster_id")
+		broadcaster_id := c.Query("broadcaster_id")
 	
 		date_filter := c.Query("date_filter")
 		cursor := ""
@@ -49,7 +49,7 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		} 
 
 		// xqc id, change back later
-		query.Set("broadcaster_id", "71092938")
+		query.Set("broadcaster_id", broadcaster_id)
 		query.Set("first", "100")
 
 		for {
@@ -129,15 +129,16 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		}
 		// check if 12hr difference has passed
 		// check for 
-		for _, c := range allClips {
+		for i := range allClips {
+			c := &allClips[i]
 			value, ok := seen_map[c.ClipID]
-			if ok  && time.Since(value.LastChecked).Hours() >= 12 {
+			if ok  && time.Since(value.LastChecked).Hours() >= 1 {
 				c.TrendingScore = int(float64(c.ViewCount - value.LastViewCount) / time.Since(value.LastChecked).Hours())
 				if c.TrendingScore > 10 {
 					c.Retention = "growing"
 				} else if c.TrendingScore > 0 {
 					c.Retention = "steady"
-				} else if c.TrendingScore <= 0 {
+				} else {
 					c.Retention = "stagnant"
 				}
 
