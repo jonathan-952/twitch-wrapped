@@ -57,8 +57,7 @@ export function ClipsView() {
         const res = await axios.get("http://localhost:8080/get_clips", {
           withCredentials: true,
           params: {
-            started: clipParams?.startedAt,
-            ended: clipParams?.endedAt,
+            date_filter: clipParams?.date_filter,
           },
         });
         
@@ -68,7 +67,7 @@ export function ClipsView() {
       }
     };
     fetchClips();
-  }, [clipParams?.startedAt, clipParams?.endedAt]);
+  }, [clipParams?.date_filter]);
 
   const handleClipParams = async (params: ClipParams) => {
     setClipParams(params);

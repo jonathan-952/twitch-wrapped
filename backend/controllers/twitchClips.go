@@ -19,8 +19,8 @@ type ClipRequest struct {
 func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// broadcaster_id := c.Query("broadcaster_id")
-		started_at := c.Query("started")
-		ended_at := c.Query("ended")
+	
+		date_filter := c.Query("date_filter")
 		cursor := ""
 
 		allClips := []models.Clip{}
@@ -29,12 +29,25 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		var toUpdate []models.ClipSnapshot
 
 		query := url.Values{}
-		if started_at != "" {
-			query.Set("started_at", started_at)
-		}
-		if ended_at != "" {
-			query.Set("ended_at", ended_at)
-		}
+
+		switch date_filter {
+		case "24hr":
+			query.Set("started_at", time.Now().AddDate(0, 0, -1).Format(time.RFC3339))
+			query.Set("ended_at", time.Now().Format(time.RFC3339))
+		case "weekly":
+			query.Set("started_at", time.Now().AddDate(0, 0, -7).Format(time.RFC3339))
+			query.Set("ended_at", time.Now().Format(time.RFC3339))
+		case "monthly":
+			query.Set("started_at", time.Now().AddDate(0, -1, 0).Format(time.RFC3339))
+			query.Set("ended_at", time.Now().Format(time.RFC3339))
+		case "6 months":
+			query.Set("started_at", time.Now().AddDate(0, -6, 0).Format(time.RFC3339))
+			query.Set("ended_at", time.Now().Format(time.RFC3339))
+		case "yearly":
+			query.Set("started_at", time.Now().AddDate(-1, 0, 0).Format(time.RFC3339))
+			query.Set("ended_at", time.Now().Format(time.RFC3339))
+		} 
+
 		// xqc id, change back later
 		query.Set("broadcaster_id", "71092938")
 		query.Set("first", "100")

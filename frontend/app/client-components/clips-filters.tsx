@@ -11,8 +11,7 @@ import { parseISO, format } from "date-fns";
 import { Clip } from "./clips-view"
 
 export interface ClipParams {
-  startedAt: string
-  endedAt: string
+  date_filter: string
 }
 interface ClipsFiltersProps {
   params: (params: ClipParams) => void
@@ -34,62 +33,39 @@ export function GroupClipsByDay(clips: Clip[]) {
 }
 
 export function ClipsFilters({params}: ClipsFiltersProps) {
-  const [fromDate, setFromDate] = useState<Date>()
-  const [toDate, setToDate] = useState<Date>()
+  const [date, setDate] = useState<string>("")
 
   useEffect(() => {
-    if (!fromDate || !toDate) {
+    if (!date) {
       return
     }
 
     params({
-      startedAt: fromDate.toISOString(),
-      endedAt: toDate.toISOString(),
+      date_filter: date
     })
-  }, [fromDate, toDate])
+  }, [date])
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-card border border-border rounded-lg">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">From:</span>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn("w-[160px] justify-start text-left font-normal", !fromDate && "text-muted-foreground")}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {fromDate ? format(fromDate, "MMM dd, yyyy") : "Select date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">To:</span>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn("w-[160px] justify-start text-left font-normal", !toDate && "text-muted-foreground")}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {toDate ? format(toDate, "MMM dd, yyyy") : "Select date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus />
-          </PopoverContent>
-        </Popover>
+     <div className="flex flex-wrap items-center gap-3 p-4 bg-card border border-border rounded-lg">
+    <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-foreground">Date Filter:</span>
+        <Select value={date} onValueChange={setDate}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="24hr">Daily</SelectItem>
+            <SelectItem value="weekly">Weekly</SelectItem>
+            <SelectItem value="monthly">Monthly</SelectItem>
+            <SelectItem value="6 months">6 months</SelectItem>
+            <SelectItem value="yearly">Yearly</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Button variant="outline" size="sm" className="ml-auto bg-transparent" 
       onClick={() => {
-        setFromDate(undefined)
-        setToDate(undefined)
+        setDate("")
       }}>
         Clear Filters
       </Button>
@@ -97,3 +73,39 @@ export function ClipsFilters({params}: ClipsFiltersProps) {
   )
 }
  
+
+      {/* // <div className="flex items-center gap-2"> */}
+      {/* //   <span className="text-sm font-medium text-foreground">From:</span> */}
+      //   <Popover>
+      //     <PopoverTrigger asChild>
+      {/* //       <Button */}
+      //         variant="outline"
+      //         className={cn("w-[160px] justify-start text-left font-normal", !fromDate && "text-muted-foreground")}
+      //       >
+      //         <CalendarIcon className="mr-2 h-4 w-4" />
+      //         {fromDate ? format(fromDate, "MMM dd, yyyy") : "Select date"}
+      //       </Button>
+      //     </PopoverTrigger>
+      //     <PopoverContent className="w-auto p-0" align="start">
+      //       <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus />
+      //     </PopoverContent>
+      //   </Popover>
+      // </div>
+
+      // <div className="flex items-center gap-2">
+      //   <span className="text-sm font-medium text-foreground">To:</span>
+      //   <Popover>
+      //     <PopoverTrigger asChild>
+      //       <Button
+      //         variant="outline"
+      //         className={cn("w-[160px] justify-start text-left font-normal", !toDate && "text-muted-foreground")}
+      //       >
+      //         <CalendarIcon className="mr-2 h-4 w-4" />
+      //         {toDate ? format(toDate, "MMM dd, yyyy") : "Select date"}
+      //       </Button>
+      //     </PopoverTrigger>
+      //     <PopoverContent className="w-auto p-0" align="start">
+      //       <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus />
+      //     </PopoverContent>
+      //   </Popover>
+      // </div>
