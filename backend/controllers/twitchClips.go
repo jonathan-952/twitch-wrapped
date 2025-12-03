@@ -2,18 +2,18 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/jonathan-952/twitch-wrapped/backend/database"
+	"github.com/jonathan-952/twitch-wrapped/backend/models"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
-	"github.com/gin-gonic/gin"
-	"github.com/jonathan-952/twitch-wrapped/backend/models"
-	"github.com/jonathan-952/twitch-wrapped/backend/database"
 )
 
 type ClipRequest struct {
 	BroadcasterID string `json:"broadcaster_id"`
-	// Popularity int 
+	// Popularity int
 }
 
 func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
@@ -22,20 +22,20 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		started_at := c.Query("started")
 		ended_at := c.Query("ended")
 		cursor := ""
+
 		allClips := []models.Clip{}
+		seen_map := make(map[string]models.ClipSnapshot)
 		var addClips []models.ClipSnapshot
-
-		// params should be passed in from fe and extracted
-
+		var toUpdate []models.ClipSnapshot
 
 		query := url.Values{}
-		if started_at!= "" {
+		if started_at != "" {
 			query.Set("started_at", started_at)
 		}
 		if ended_at != "" {
 			query.Set("ended_at", ended_at)
 		}
-		// xqc id, change back later 
+		// xqc id, change back later
 		query.Set("broadcaster_id", "71092938")
 		query.Set("first", "100")
 
@@ -48,7 +48,7 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 
 			url += "?"
 
-			req, err := http.NewRequest("GET", url + query.Encode(), nil)
+			req, err := http.NewRequest("GET", url+query.Encode(), nil)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
@@ -72,26 +72,41 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
 				return
 			}
-
+			// map body to variable
 			var twitchResp models.TwitchClipsResponse
 			if err := json.Unmarshal(body, &twitchResp); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
 				return
 			}
 
-			for _, f := range twitchResp.Data {
-				addClips = append(addClips, models.ClipSnapshot{
-					ClipID: f.ClipID,
-					CreatedAt: f.CreatedAt,
-					LastChecked: time.Now(),
-					LastViewCount: f.ViewCount,
-				})
-    		}
+			clipIDs := make([]string, 0, len(twitchResp.Data))
+			for _, c := range twitchResp.Data {
+				clipIDs = append(clipIDs, c.ClipID)
+			}
 
+			// list of clips we have already stored in db
+			var seenClips []models.ClipSnapshot
+
+			if err := database.DB.Where("clip_id IN ?", clipIDs).Find(&seenClips).Error; err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+
+			// turn seen clips into map
+			for _, c := range seenClips {
+				seen_map[c.ClipID] = models.ClipSnapshot{
+					CreatedAt:     c.CreatedAt,
+					LastChecked:   c.LastChecked,
+					LastViewCount: c.LastViewCount,
+				}
+			}
+
+			// if clip has been seen already, after updating trend score and retention, update last_view count and last_checked time to current
+			// replace certain fields in clips in payload with old data (lastChecked, initial view count, etc.)
 
 			allClips = append(allClips, twitchResp.Data...)
 
-			database.DB.Create(&addClips)
+
 
 			if twitchResp.Pagination.Cursor == "" {
 				break
@@ -100,11 +115,48 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 			cursor = twitchResp.Pagination.Cursor
 		}
 
-		c.JSON(200, gin.H{
-		"clips": allClips,
-	})
+		for _, c := range allClips {
+			value, ok := seen_map[c.ClipID]
+			if ok {
+				c.TrendingScore = (c.ViewCount - value.LastViewCount) / value.LastChecked.Hour()
+				if c.TrendingScore > 10 {
+					c.Retention = "growing"
+				}
+				if c.TrendingScore > 0 {
+					c.Retention = "growing"
+				}
+				if c.TrendingScore <= 0 {
+					c.Retention = "stagnant"
+				}
+			}
+		}
 
-		// take into account how many clips you want to fetch
-		// query for time window (started/ended date)
-}
+		// add every incoming clip to var -> push to db after
+		for _, f := range allClips {
+			_, ok := seen_map[f.ClipID]
+
+			if ok {
+				toUpdate = append(toUpdate, models.ClipSnapshot{
+					ClipID:        f.ClipID,
+					CreatedAt:     f.CreatedAt,
+					LastChecked:   time.Now(),
+					LastViewCount: f.ViewCount,
+				})
+			} else {
+				addClips = append(addClips, models.ClipSnapshot{
+					ClipID:        f.ClipID,
+					CreatedAt:     f.CreatedAt,
+					LastChecked:   time.Now(),
+					LastViewCount: f.ViewCount,
+				})
+			}
+		}
+
+		database.DB.Create(&addClips)
+		database.UpdateClipSnapshot(toUpdate)
+
+		c.JSON(200, gin.H{
+			"clips": allClips,
+		})
+	}
 }

@@ -14,5 +14,4 @@ background features
     - store snapshot of clip view count in db
     - check every 24hrs if clip still trending?
 - clip filters
-    - filter by stream (group by date)
     - filter by trending

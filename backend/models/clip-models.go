@@ -14,6 +14,8 @@ type Clip struct {
 	Duration float64 `json:"duration"`
 	ThumbnailURL string `json:"thumbnail_url"`
 	EmbedURL string `json:"embed_url"`
+	TrendingScore int
+	Retention string
 }
 
 type ClipParams struct {

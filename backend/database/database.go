@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-
 	"github.com/jonathan-952/twitch-wrapped/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -71,6 +70,12 @@ func CreateSnapshot(clip_id, created_at string, last_checked time.Time, last_vie
 	return add.Error
 }
 
-func UpdateClipSnapshot() {
-
+func UpdateClipSnapshot(clips []models.ClipSnapshot) {
+	for _, c := range clips {
+		DB.Model(&models.ClipSnapshot{}).Where("clip_id = ?", c.ClipID).Updates(models.ClipSnapshot{
+			LastChecked: time.Now(),
+			LastViewCount: c.LastViewCount,
+		})
+	
+	}
 }
