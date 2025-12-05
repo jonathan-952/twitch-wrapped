@@ -7,10 +7,16 @@ import {StreamersData} from "@/page"
 interface StreamersSidebarProps {
   streamers: StreamersData[]
   selectedStreamer: StreamersData | null
-  self: StreamersData | null
+  selfID: string
   onSelectStreamer: (streamer: StreamersData) => void
 }
-export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer }: StreamersSidebarProps) {
+export function StreamersSidebar({ streamers, selectedStreamer, selfID, onSelectStreamer }: StreamersSidebarProps) {
+  const selfStreamer: StreamersData = {
+    broadcaster_id: selfID,
+    broadcaser_login: "(you)",
+    broadcaster_name: "My Channel",
+    followed_at: ""   // unused for your own channel
+  }
   return (
     <aside className="fixed left-0 top-14 bottom-0 w-64 bg-sidebar border-r border-sidebar-border overflow-y-auto">
       <div className="p-4">
@@ -20,13 +26,10 @@ export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer
           Your Channel
         </h2>
         <button
-          onClick={() => {
-            const yourChannel = streamers.find(s => s.is_self) || null
-            if (yourChannel) onSelectStreamer(yourChannel)
-          }}
+      onClick={() => onSelectStreamer(selfStreamer)}
           className={cn(
             "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors",
-            selectedStreamer?.is_self
+            selectedStreamer?.broadcaster_id === selfID
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
           )}
