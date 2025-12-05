@@ -40,7 +40,7 @@ export function ClipCard({ clip }: ClipCardProps) {
   const [playing, setPlaying] = useState(false);
   const embedUrl = clip.embed_url + "&parent=localhost&autoplay=true";
 
-  const isTrending = clip.TrendingScore && clip.TrendingScore > 75;
+  const isTrending = clip.TrendingScore && clip.TrendingScore > 10;
   const hasRetention = clip.Retention && clip.Retention !== "";
 
   return (

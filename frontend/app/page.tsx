@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Navbar } from "@/client-components/navbar"
 import { StreamersSidebar } from "@/client-components/streamers-sidebar"
 import { ClipsView } from "@/client-components/clips-view"
-import axios from "axios"
+import axios, {AxiosError} from "axios"
+import { useRouter } from "next/navigation"
 
 export interface StreamersData {
     broadcaster_id:    string
@@ -17,6 +18,7 @@ export default function DashboardPage() {
   const [selectedStreamer, setSelectedStreamer] = useState<StreamersData | null>(null)
   const [streamers, setStreamers] = useState<StreamersData[]>([])
   const [self, setSelf] = useState<string>("")
+  const router = useRouter()
 
   useEffect(() => {
     const getFollowers = (async() => {
@@ -28,6 +30,11 @@ export default function DashboardPage() {
         setSelf(res.data.self)
       } catch (err) {
         console.log(err)
+        const error = err as AxiosError;
+                console.log(err);
+                if (error.response?.status === 401) {
+                  router.push('/auth')
+                }
       }
     })
     getFollowers()

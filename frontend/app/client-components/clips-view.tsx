@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import axios, { HttpStatusCode, AxiosError } from "axios";
 import { parseISO, format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 import {
   ClipsFilters,
@@ -11,6 +12,7 @@ import {
 import { ClipCard } from "@/client-components/clip-card";
 import { ClipParams } from "@/client-components/clips-filters";
 import { StreamersData } from "@/page";
+
 
 export interface Clip {
   url: string;
@@ -27,6 +29,8 @@ export interface Clip {
 export function ClipsView({streamer}: {streamer: StreamersData}) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [clipParams, setClipParams] = useState<ClipParams | null>({date_filter: "24hr"});
+
+  const router = useRouter();
 
   // NEW — make a per-day limit state
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>(
@@ -76,7 +80,11 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
 
         setVisibleCounts(newCounts);
       } catch (err) {
+        const error = err as AxiosError;
         console.log(err);
+        if (error.response?.status === 401) {
+          router.push('/auth')
+        }
       }
     };
 
