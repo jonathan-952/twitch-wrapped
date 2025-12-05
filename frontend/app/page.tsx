@@ -16,6 +16,7 @@ export interface StreamersData {
 export default function DashboardPage() {
   const [selectedStreamer, setSelectedStreamer] = useState<StreamersData | null>(null)
   const [streamers, setStreamers] = useState<StreamersData[]>([])
+  const [self, setSelf] = useState<StreamersData | null>(null)
 
   useEffect(() => {
     const getFollowers = (async() => {
@@ -24,6 +25,7 @@ export default function DashboardPage() {
         {withCredentials: true}
         )
         setStreamers(res.data.follows)
+        setSelf(res.data.self)
       } catch (err) {
         console.log(err)
       }
@@ -43,6 +45,7 @@ export default function DashboardPage() {
           streamers={streamers}
           selectedStreamer={selectedStreamer}
           onSelectStreamer={handleClick}
+          self={self}
         />
         <main className="flex-1 ml-64">
           {selectedStreamer && 

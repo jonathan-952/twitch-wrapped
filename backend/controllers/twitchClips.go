@@ -43,9 +43,6 @@ func GetClips(OAuthToken, TwitchClient string) gin.HandlerFunc {
 		case "6 months":
 			query.Set("started_at", time.Now().AddDate(0, -6, 0).Format(time.RFC3339))
 			query.Set("ended_at", time.Now().Format(time.RFC3339))
-		case "yearly":
-			query.Set("started_at", time.Now().AddDate(-1, 0, 0).Format(time.RFC3339))
-			query.Set("ended_at", time.Now().Format(time.RFC3339))
 		} 
 
 		// xqc id, change back later

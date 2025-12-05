@@ -33,7 +33,7 @@ export function GroupClipsByDay(clips: Clip[]) {
 }
 
 export function ClipsFilters({params}: ClipsFiltersProps) {
-  const [date, setDate] = useState<string>("")
+  const [date, setDate] = useState<string>("24hr")
 
   useEffect(() => {
     if (!date) {
@@ -57,8 +57,7 @@ export function ClipsFilters({params}: ClipsFiltersProps) {
             <SelectItem value="24hr">Daily</SelectItem>
             <SelectItem value="weekly">Weekly</SelectItem>
             <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="6 months">6 months</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
+            <SelectItem value="6 months">Bi-Annual</SelectItem>
           </SelectContent>
         </Select>
       </div>

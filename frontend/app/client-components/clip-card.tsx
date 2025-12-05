@@ -36,11 +36,12 @@ function formatRelativeTime(timestamp: string): string {
   if (diffDays < 7) return `${diffDays}d ago`;
   return `${Math.floor(diffDays / 7)}w ago`;
 }
-
-export function ClipCard({ clip}: ClipCardProps) {
-  console.log(clip);
+export function ClipCard({ clip }: ClipCardProps) {
   const [playing, setPlaying] = useState(false);
   const embedUrl = clip.embed_url + "&parent=localhost&autoplay=true";
+
+  const isTrending = clip.TrendingScore && clip.TrendingScore > 75;
+  const hasRetention = clip.Retention && clip.Retention !== "";
 
   return (
     <div className="group cursor-pointer">
@@ -63,6 +64,28 @@ export function ClipCard({ clip}: ClipCardProps) {
               alt={clip.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
+
+            {/* 🔥 Trending Badge */}
+            {isTrending && (
+              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded shadow">
+                🔥 Trending
+              </div>
+            )}
+
+            {/* Retention Badge */}
+            {hasRetention && (
+              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {clip.Retention}
+              </div>
+            )}
+
+            {/* 👁 View Count Badge */}
+            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+              <EyeIcon className="w-3 h-3" />
+              {formatViews(clip.view_count)}
+            </div>
+
+            {/* Play Overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-black/60 rounded-full p-3 text-white">▶</div>
             </div>

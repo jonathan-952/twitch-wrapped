@@ -7,22 +7,48 @@ import {StreamersData} from "@/page"
 interface StreamersSidebarProps {
   streamers: StreamersData[]
   selectedStreamer: StreamersData | null
+  self: StreamersData | null
   onSelectStreamer: (streamer: StreamersData) => void
 }
-
 export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer }: StreamersSidebarProps) {
   return (
     <aside className="fixed left-0 top-14 bottom-0 w-64 bg-sidebar border-r border-sidebar-border overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Followed Channels</h2>
+
+        {/* ─── Your Channel Section ───────────────────────── */}
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Your Channel
+        </h2>
+        <button
+          onClick={() => {
+            const yourChannel = streamers.find(s => s.is_self) || null
+            if (yourChannel) onSelectStreamer(yourChannel)
+          }}
+          className={cn(
+            "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors",
+            selectedStreamer?.is_self
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+          )}
+        >
+
+          My Channel
+        </button>
+
+        <div className="h-px bg-sidebar-border my-4" />
+
+
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Followed Channels
+        </h2>
         <div className="space-y-1">
           {streamers.map((streamer, index) => (
             <button
               key={index}
               onClick={() => onSelectStreamer(streamer)}
               className={cn(
-                "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-black bg-red-50",
-                selectedStreamer != null && selectedStreamer.broadcaster_id === streamer.broadcaster_id
+                "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors",
+                selectedStreamer?.broadcaster_id === streamer.broadcaster_id
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "hover:bg-sidebar-accent/50 text-sidebar-foreground",
               )}
@@ -31,6 +57,7 @@ export function StreamersSidebar({ streamers, selectedStreamer, onSelectStreamer
             </button>
           ))}
         </div>
+
       </div>
     </aside>
   )

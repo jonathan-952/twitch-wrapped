@@ -26,7 +26,7 @@ export interface Clip {
 
 export function ClipsView({streamer}: {streamer: StreamersData}) {
   const [clips, setClips] = useState<Clip[]>([]);
-  const [clipParams, setClipParams] = useState<ClipParams | null>(null);
+  const [clipParams, setClipParams] = useState<ClipParams | null>({date_filter: "24hr"});
 
   // NEW — make a per-day limit state
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>(
@@ -71,7 +71,7 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
         const newGrouped = GroupClipsByDay(res.data.clips);
 
         Object.keys(newGrouped).forEach((day) => {
-          newCounts[day] = 4; // show first 10 by default
+          newCounts[day] = 3; // show first 10 by default
         });
 
         setVisibleCounts(newCounts);
@@ -81,7 +81,7 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
     };
 
     fetchClips();
-  }, [clipParams?.date_filter]);
+  }, [clipParams?.date_filter, streamer]);
 
   // Handle child filter updates
   const handleClipParams = (params: ClipParams) => {
@@ -92,7 +92,7 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
   const handleViewMore = (day: string) => {
     setVisibleCounts((prev) => ({
       ...prev,
-      [day]: prev[day] + 8, // reveal 10 more
+      [day]: prev[day] + 9, // reveal 10 more
     }));
   };
 
@@ -109,7 +109,7 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
 
       {days.map((day) => {
         const clipsForDay = grouped[day] || [];
-        const visible = visibleCounts[day] || 8;
+        const visible = visibleCounts[day] || 9;
 
         return (
           <section key={day} className="mb-6">
@@ -117,7 +117,7 @@ export function ClipsView({streamer}: {streamer: StreamersData}) {
               {format(parseISO(day), "EEEE, MMM d")}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {clipsForDay.slice(0, visible).map((clip, index) => (
                 <ClipCard key={index} clip={clip} />
               ))}

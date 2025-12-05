@@ -15,3 +15,14 @@ background features
     - check every 24hrs if clip still trending?
 - clip filters
     - filter by trending
+
+
+add filter by trending, view count, whatever else
+
+add overlay on clips to show which are trending, high retention (emojis)
+
+fix css
+
+deploy
+
+add demo button
