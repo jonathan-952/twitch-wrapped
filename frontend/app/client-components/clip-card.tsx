@@ -36,6 +36,7 @@ function formatRelativeTime(timestamp: string): string {
   if (diffDays < 7) return `${diffDays}d ago`;
   return `${Math.floor(diffDays / 7)}w ago`;
 }
+
 export function ClipCard({ clip }: ClipCardProps) {
   const [playing, setPlaying] = useState(false);
   const embedUrl = clip.embed_url + "&parent=localhost&autoplay=true";
