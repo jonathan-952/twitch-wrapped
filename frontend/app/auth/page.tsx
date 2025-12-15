@@ -35,13 +35,13 @@ export default function Auth() {
           { code: code, userID: user },
           { withCredentials: true }
         )
+        router.push("/")
       } catch (err) {
         console.error(err)
       }
     }
 
     getToken()
-    router.push("http://localhost:3000")
   }, [code, router])
 
   return (
