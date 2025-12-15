@@ -30,29 +30,29 @@ export function ClipsView({
 }) {
   const [clips, setClips] = useState<Clip[]>([])
   const router = useRouter()
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({})
 
-  // per-day pagination
-  const [visibleCounts, setVisibleCounts] = useState<
-    Record<string, number>
-  >({})
+  // Filtering and grouping remain the same
+  const filteredClips = useMemo(() => {
+    return clips.filter((clip) => {
+      if (clipParams.trendingOnly && clip.TrendingScore <= 10) return false
+      if (clipParams.growingOnly && !clip.Retention) return false
+      return true
+    })
+  }, [clips, clipParams])
 
   const grouped = useMemo(() => {
-    const baseGroups = GroupClipsByDay(clips)
+    const baseGroups = GroupClipsByDay(filteredClips)
     const sortedGroups: Record<string, Clip[]> = {}
-
     Object.keys(baseGroups).forEach((day) => {
       sortedGroups[day] = [...baseGroups[day]].sort(
         (a, b) => b.view_count - a.view_count
       )
     })
-
     return sortedGroups
-  }, [clips])
+  }, [filteredClips])
 
-  const days = useMemo(
-    () => Object.keys(grouped).sort().reverse(),
-    [grouped]
-  )
+  const days = useMemo(() => Object.keys(grouped).sort().reverse(), [grouped])
 
   useEffect(() => {
     const fetchClips = async () => {
@@ -64,22 +64,15 @@ export function ClipsView({
             broadcaster_id: streamer.broadcaster_id,
           },
         })
-
         setClips(res.data.clips)
 
         const newCounts: Record<string, number> = {}
-        const newGrouped = GroupClipsByDay(res.data.clips)
-
-        Object.keys(newGrouped).forEach((day) => {
-          newCounts[day] = 9
-        })
-
+        const grouped = GroupClipsByDay(res.data.clips)
+        Object.keys(grouped).forEach((day) => (newCounts[day] = 9))
         setVisibleCounts(newCounts)
       } catch (err) {
         const error = err as AxiosError
-        if (error.response?.status === 401) {
-          router.push("/auth")
-        }
+        if (error.response?.status === 401) router.push("/auth")
       }
     }
 
@@ -122,6 +115,12 @@ export function ClipsView({
           </section>
         )
       })}
+
+      {days.length === 0 && (
+        <p className="text-sm text-muted-foreground mt-6">
+          No clips match your filters.
+        </p>
+      )}
     </div>
   )
 }

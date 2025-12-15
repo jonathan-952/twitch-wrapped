@@ -8,12 +8,6 @@ export function Navbar() {
         <TwitchIcon className="w-7 h-7 text-primary" />
         <h1 className="text-lg font-bold text-foreground">Clip Catchup</h1>
       </div>
-
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground">
-          Settings
-        </Button>
-      </div>
     </nav>
   )
 }
