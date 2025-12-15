@@ -35,7 +35,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 		params.Add("client_secret", TwitchSecret)
 		params.Add("code", body.Code)
 		params.Add("grant_type", "authorization_code")
-		params.Add("redirect_uri", "http://localhost:3000/auth")
+		params.Add("redirect_uri", "https://twitch-wrapped-puytnxzg2-jonathan-952s-projects.vercel.app/auth")
 
 		resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", params)
 
