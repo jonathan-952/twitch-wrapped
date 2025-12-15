@@ -7,7 +7,7 @@ import (
 
 func CorsPolicy() *cors.Config {
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"https:/twitch-wrapped.vercel.app"} // Replace with your frontend origin(s)
+	config.AllowOrigins = []string{"https://twitch-wrapped.vercel.app", "http://localhost:3000"} // Replace with your frontend origin(s)
 	// config.AllowAllOrigins = true // Alternatively, allow all origins (less secure for production)
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control", "Pragma"}
