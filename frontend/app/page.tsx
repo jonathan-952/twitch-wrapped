@@ -29,7 +29,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const getFollowers = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/following", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_FETCH_FOLLOWING}`, {
           withCredentials: true,
         })
         setStreamers(res.data.follows)

@@ -57,7 +57,7 @@ export function ClipsView({
   useEffect(() => {
     const fetchClips = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/get_clips", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_FETCH_CLIPS}`, {
           withCredentials: true,
           params: {
             date_filter: clipParams.date_filter,

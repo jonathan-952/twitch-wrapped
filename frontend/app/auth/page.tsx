@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 export default function Auth() {
   const [userID, setUserID] = useState<string>("")
 
-  const url = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=http://localhost:3000/auth&scope=user:read:follows&state=c3ab8aa609ea11e793ae92361f002671`
+  const url = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=user:read:follows&state=c3ab8aa609ea11e793ae92361f002671`
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -31,7 +31,7 @@ export default function Auth() {
     const getToken = async () => {
       try {
         await axios.post(
-          "http://localhost:8080/authenticate_token",
+          `${process.env.NEXT_PUBLIC_AUTHENTICATE_URL}`,
           { code: code, userID: user },
           { withCredentials: true }
         )
