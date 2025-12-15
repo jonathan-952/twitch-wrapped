@@ -96,7 +96,7 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 			3600,
 			"/",
 			"https://twitch-wrapped.vercel.app", // Or your actual domain like "example.com"
-			false,       // Set to true for HTTPS
+			true,       // Set to true for HTTPS
 			true,        // Set to true to prevent client-side JavaScript access
 		
 		)
