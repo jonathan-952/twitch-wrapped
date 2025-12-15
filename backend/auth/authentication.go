@@ -90,16 +90,15 @@ func Authenticate_Token(TwitchSecret, TwitchClient, OAuthToken, JWT_Secret strin
 			return
 		}
 
-		c.SetCookie(
-			"twitch_auth",
-			cookie,
-			3600,
-			"/",
-			"https://twitch-wrapped.vercel.app", // Or your actual domain like "example.com"
-			true,       // Set to true for HTTPS
-			true,        // Set to true to prevent client-side JavaScript access
-		
-		)
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     "twitch_auth",
+			Value:    cookie,
+			Path:     "/",
+			MaxAge:   3600,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode, 
+		})
 		c.JSON(200, gin.H{"status" : "inserted user table into database"})
 	}
 }
